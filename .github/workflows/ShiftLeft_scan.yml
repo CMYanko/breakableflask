@@ -18,6 +18,12 @@ jobs:
       shell: bash
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
+    - name: Legacy Static Analysis
+      run: |
+        echo "Please update your `shiftleft-python-demo` fork!"
+        ${GITHUB_WORKSPACE}/sl analyze --wait --no-cpg --app breakableflask_nocpg --tag app.group=VBD --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --python $(pwd)
+      env:
+        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
     - name: NextGen Static Analysis
       run: |
         pip install --upgrade setuptools wheel
@@ -26,17 +32,6 @@ jobs:
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
         
-      if:
-        ${{ hashFiles('requirements.txt') != '' }}
-    - name: Legacy Static Analysis
-      run: |
-        echo "Please update your `shiftleft-python-demo` fork!"
-        ${GITHUB_WORKSPACE}/sl analyze --wait --no-cpg --app breakableflask_nocpg --tag app.group=VBD --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --python $(pwd)
-      env:
-        SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
-        
-      if:
-        ${{ hashFiles('requirements.txt') == '' }}
   Build-Rules: 
     runs-on: ubuntu-latest
     needs: NextGen-Static-Analysis
